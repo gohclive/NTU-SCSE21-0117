@@ -3,6 +3,7 @@ import csv
 from VM import *
 from Machine import Machine
 import savefile
+import math
 
 def fileToDict(filename):
     """ This method read the csv file and append them rows into a list """
@@ -36,7 +37,7 @@ def find_VM_by_id(id, vm_type_list):
 
 
 def first_fit(vm_entry_list,vm_type_list):
-    """ This method uses first come first serve algorithm for bin packing
+    """ This method uses first fit algorithm for bin packing
     vm machine entries are sorted by the start time and would be added to the physical machine.
     This algorithm did not account for the endtime of the vm entry.
     Parameters: (connection, list)
@@ -47,7 +48,7 @@ def first_fit(vm_entry_list,vm_type_list):
 
     # initiate and declare machine and list of machine
     machine_list = []
-    m0 = Machine()
+    m0 = Machine(0)
     machine_list.append(m0)
     # loop through item in vm_list,
     # check if vm entry is in phyiscal machine 16, if invalid entry, break
@@ -64,24 +65,20 @@ def first_fit(vm_entry_list,vm_type_list):
                 machine.addVM(vm)
                 break
         else:
-            m = Machine()
+            counter+=1
+            m = Machine(counter)
             m.addVM(vm)
             machine_list.append(m)    
     return machine_list
 
-
-def Fit(vm_entry_list,vm_type_list,mode):
-    # get first 100 vm entries where start time is between 0 and 2 arrange by core
+def next_fit(vm_entry_list, vm_type_list):
+    """This method check if current vm entry fits in current physical machine, if so place it in this machine, else start a new machine instance"""
+    # get first 100 vm entries where start time is between 0 and 2
     vm_list = vm_entry_list
-    sorted_list = []
-    if (mode == "best"):
-        sorted_list = sorted(vm_list,key=lambda d: d["core"],reverse=True)
-    elif(mode == "worst"):
-        sorted_list = sorted(vm_list,key=lambda d: d["core"])
 
     # initiate and declare machine and list of machine
     machine_list = []
-    m0 = Machine()
+    m0 = Machine(0)
     machine_list.append(m0)
     # loop through item in vm_list,
     # check if vm entry is in phyiscal machine 16, if invalid entry, break
@@ -89,34 +86,121 @@ def Fit(vm_entry_list,vm_type_list,mode):
     # else create new machine instance, add vm to machine and append it to the list
 
     counter = 0
-    for item in sorted_list:
-        for machine in machine_list:
-            vm = find_VM_by_id(item["vmTypeId"], vm_type_list)
-            if (vm == None):
-                break
-            if(machine.checkVm(vm)): 
-                machine.addVM(vm)
-                break
+    for item in vm_list:
+        curr_mach = m0
+        vm = find_VM_by_id(item["vmTypeId"], vm_type_list)
+        if (vm == None):
+            break
+        if(curr_mach.checkVm(vm)):
+            curr_mach.addVM(vm)
         else:
-            m = Machine()
+            counter+=1
+            m = Machine(counter)
             m.addVM(vm)
-            machine_list.append(m)
+            curr_mach = m
+            machine_list.append(m)    
     return machine_list
+
+def best_fit(vm_entry_list,vm_type_list):
+    #get vm entries where start time is between 0 and 2
+    vm_list = vm_entry_list
+    #find lower bound for vm entry core
+    total_core = 0
+    for item in vm_entry_list:
+        total_core += float(item["core"])
+    optimal_num_machine = math.ceil(total_core/1)
+
+
+    #initalise and declare machine list and machine
+    machine_list = []
+    for i in range(optimal_num_machine):
+        m = Machine(i)
+        machine_list.append(m)
+    
+    for item in vm_list:
+        vm = find_VM_by_id(item["vmTypeId"], vm_type_list)
+        vmcore = float(vm["core"])
+        closest_fit = 0
+        chosen_machine = 0
+        
+        if(vm == None):
+            break
+        else:
+            for m in machine_list:
+                if(m.checkVm(vm)):
+                    if((vmcore+m.core_used) > closest_fit):
+                        closest_fit = vmcore+m.core_used
+                        chosen_machine = m
+                    chosen_machine.addVM(vm)
+    return machine_list
+
+
+def worse_fit(vm_entry_list,vm_type_list):
+    #get vm entries where start time is between 0 and 2
+    vm_list = vm_entry_list
+    #find lower bound for vm entry core
+    total_core = 0
+    for item in vm_entry_list:
+        total_core += float(item["core"])
+    optimal_num_machine = math.ceil(total_core/1)
+
+
+    #initalise and declare machine list and machine
+    machine_list = []
+    for i in range(optimal_num_machine):
+        m = Machine(i)
+        machine_list.append(m)
+    
+    for item in vm_list:
+        vm = find_VM_by_id(item["vmTypeId"], vm_type_list)
+        vmcore = float(vm["core"])
+        closest_fit = 0
+        chosen_machine = 0
+        
+        if(vm == None):
+            break
+        else:
+            for m in machine_list:
+                if(m.checkVm(vm)):
+                    if((vmcore+m.core_used) > closest_fit):
+                        closest_fit = vmcore+m.core_used
+                        chosen_machine = m
+                    chosen_machine.addVM(vm)       
+    return machine_list
+
+
 
 
 def main():
 
-    # get total number of vmTypes that is in machine 16 and store them in list
+    #get relevant files and store them in a dictionary
     vm_type_list = fileToDict("csv/vm type list.csv")
+    vm_entry_1000 = fileToDict("csv/vm entry list(1000).csv")
+
+    # get total number of vmTypes that is in machine 16 and store them in list
     print("total number of vm types: " + str(len(vm_type_list)))
     print("----------------------------------------------------------------")
 
+    #offline algorithm
 
-    # online algorithm
+    #next fit
+    machine_list = next_fit(vm_entry_1000,vm_type_list)
+    print("next fit")
+    #print first 5 machine
+    for i in range(5):
+        print(machine_list[i])
+
+    counter = 0
+    for item in machine_list:
+        counter += len(item.vm_list)
+
+    print("number of physical machine required:"+str(len(machine_list)))
+    print("----------------------------------------------------------------")
+
+
     # first fit
-    vm_entry_1000 = fileToDict("csv/vm entry list(1000).csv")
     machine_list = first_fit(vm_entry_1000,vm_type_list)
-    
+    print("first fit")
     #print first 5 machine
     for i in range(5):
         print(machine_list[i])
@@ -129,9 +213,8 @@ def main():
     print("----------------------------------------------------------------")
 
     # best fit
-    machine_list = Fit(vm_entry_1000,vm_type_list,"best")
-
-     #print first 5 machine
+    machine_list = best_fit(vm_entry_1000,vm_type_list)
+    print("best fit")
     for i in range(5):
         print(machine_list[i])
 
@@ -143,9 +226,8 @@ def main():
     print("----------------------------------------------------------------")
 
     # Worse fit
-    machine_list = Fit(vm_entry_1000,vm_type_list,"worst")
-
-     #print first 5 machine
+    machine_list = worse_fit(vm_entry_1000,vm_type_list)
+    print("worse fit")
     for i in range(5):
         print(machine_list[i])
 

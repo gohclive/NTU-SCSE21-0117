@@ -17,9 +17,10 @@ def create_connection():
 
 def get_vm_entry(con, starttime1, starttime2, limit):
     cur = con.cursor()
-    cur.execute("select vm.vmTypeId,priority,starttime,endtime, core, memory, machineId  from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime > ? and starttime < ? and machineId = 16 order by CAST(starttime as float) limit ?",
+    cur.execute("select vm.vmId,vm.vmTypeId,priority,starttime,endtime, core, memory, machineId  from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime > ? and starttime < ? and machineId = 16 order by CAST(starttime as float) limit ?",
                 (starttime1, starttime2, limit))
     vm_entry_list = cur.fetchall()
+    print(vm_entry_list[0])
     return vm_entry_list
 
 def get_vmType(con, vmId):
@@ -52,15 +53,19 @@ def save():
         save_to_csv("csv/vm type list.csv",header,vm_type_list)
     if not (Path("csv/vm entry list.csv").exists()):
         print("vm entry list entry not found, creating vm entry list.csv")
-        vm_entry_list = get_vm_entry(con,0,2,"1000000000")
+        vm_entry_list = get_vm_entry(con,0,2,"5204184")
         header = ["vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
         save_to_csv("csv/vm entry list.csv",header,vm_entry_list)
     if not (Path("csv/vm entry list(1000).csv").exists()):
         print("vm entry list(1000) not found")
         vm_entry_list = get_vm_entry(con,0,2,1000)
-        header = ["vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
+        header = ["vmId","vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
         save_to_csv("csv/vm entry list(1000).csv",header,vm_entry_list)
-
+    if not (Path("csv/vm entry list(100).csv").exists()):
+        print("vm entry list(100) not found")
+        vm_entry_list = get_vm_entry(con,0,2,100)
+        header = ["vmId","vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
+        save_to_csv("csv/vm entry list(100).csv",header,vm_entry_list)
     con.close()
 
 

@@ -33,4 +33,6 @@ class Machine:
 
     def get_vm_list(self):
         for item in self.vm_list:
-            print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"] + " was added to machine " + str(self.id))
+            print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"] + " was added to machine " + str(self.id) + " core used: " + item["core"] + " memory used:" + item["memory"])
+            
+

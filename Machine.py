@@ -30,3 +30,7 @@ class Machine:
     def __repr__(self) -> str:
          rep = 'machine( Core Used: ' +str(self.core_used) + ', Memory used: ' + str(self.memory_used) + ', number of vm inside machine: ' + str(len(self.vm_list)) + ")"
          return rep
+
+    def get_vm_list(self):
+        for item in self.vm_list:
+            print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"] + " was added to machine " + str(self.id))

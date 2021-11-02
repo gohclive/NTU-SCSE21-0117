@@ -54,7 +54,7 @@ def save():
     if not (Path("csv/vm entry list.csv").exists()):
         print("vm entry list entry not found, creating vm entry list.csv")
         vm_entry_list = get_vm_entry(con,0,2,"5204184")
-        header = ["vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
+        header = ["vmId","vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
         save_to_csv("csv/vm entry list.csv",header,vm_entry_list)
     if not (Path("csv/vm entry list(1000).csv").exists()):
         print("vm entry list(1000) not found")

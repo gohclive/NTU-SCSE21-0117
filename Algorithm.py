@@ -10,7 +10,7 @@ def fileToDict(filename):
     fileList = []
     with open(filename, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
-        next(csv_reader) #skip headers
+        #next(csv_reader) #skip headers
         for row in csv_reader:
             fileList.append(row)
     return fileList
@@ -37,11 +37,12 @@ def find_VM_by_id(id, vm_type_list):
     return False
 
 
-def first_fit(vm_entry_list,vm_type_list):
+
+def first_fit(vm_entry_list,vm_type_list,option):
     """ This method uses first fit algorithm for bin packing
     vm machine entries are sorted by the start time and would be added to the physical machine.
-    This algorithm did not account for the endtime of the vm entry.
-    Parameters: (connection, list)
+    option: r = remove
+    Parameters: (connection, list, option)
     Returns : a list of machines being used  """
 
     # get first 100 vm entries where start time is between 0 and 2
@@ -63,6 +64,12 @@ def first_fit(vm_entry_list,vm_type_list):
             if (vm_isValid == False):
                 break
             else:
+                #remove expired vms
+                if option == "r":
+                    curr_time = (float(item["starttime"]))
+                    for machine in machine_list:
+                        machine.remove_expired_VM(curr_time)
+                
                 if(machine.checkVm(item)):
                     machine.addVM(item)
                     break
@@ -73,7 +80,7 @@ def first_fit(vm_entry_list,vm_type_list):
             machine_list.append(m)    
     return machine_list
 
-def next_fit(vm_entry_list, vm_type_list):
+def next_fit(vm_entry_list, vm_type_list, option):
     """This method check if current vm entry fits in current physical machine, if so place it in this machine, else start a new machine instance"""
     # get first 100 vm entries where start time is between 0 and 2
     vm_list = vm_entry_list
@@ -88,12 +95,18 @@ def next_fit(vm_entry_list, vm_type_list):
     # else create new machine instance, add vm to machine and append it to the list
 
     counter = 0
+    curr_mach = m0
     for item in vm_list:
-        curr_mach = m0
         vm_isvalid = find_VM_by_id(item["vmTypeId"], vm_type_list)
         if (vm_isvalid == False):
             break
         else:
+            #remove expired vms
+            if option == "r":
+                curr_time = (float(item["starttime"]))
+                for machine in machine_list:
+                    machine.remove_expired_VM(curr_time)
+
             if(curr_mach.checkVm(item)):
                 curr_mach.addVM(item)
             else:
@@ -104,7 +117,9 @@ def next_fit(vm_entry_list, vm_type_list):
                 machine_list.append(m)    
     return machine_list
 
-def best_fit(vm_entry_list,vm_type_list):
+
+def best_fit(vm_entry_list,vm_type_list,option):
+    """This method checks for the machine with the tightest fit, if vm does not fit any machine, start a new machine instance and place vm in it """
     #get vm entries where start time is between 0 and 2
     vm_list = vm_entry_list
     #find lower bound for vm entry core
@@ -125,10 +140,17 @@ def best_fit(vm_entry_list,vm_type_list):
         vmcore = float(item["core"])
         closest_fit = 0
         chosen_machine = 0
+
         
         if(vm_isvalid == False):
             break
         else:
+            #remove expired vms
+            if option == "r":
+                curr_time = (float(item["starttime"]))
+                for machine in machine_list:
+                    machine.remove_expired_VM(curr_time)
+
             for m in machine_list:
                 if(m.checkVm(item)):
                     if((vmcore+m.core_used) > closest_fit):
@@ -140,7 +162,7 @@ def best_fit(vm_entry_list,vm_type_list):
     return machine_list
 
 
-def worse_fit(vm_entry_list,vm_type_list):
+def worse_fit(vm_entry_list,vm_type_list, option):
     #get vm entries where start time is between 0 and 2
     vm_list = vm_entry_list
     #find lower bound for vm entry core
@@ -161,12 +183,17 @@ def worse_fit(vm_entry_list,vm_type_list):
         vmcore = float(item["core"])
         least_fit = 1
         chosen_machine = len(machine_list)+1
-        if(item["vmId"]=="2883068"):
-            print("hello" + item["vmId"])
-        
+    
         if(vm_isvalid == False):
             break
         else:
+
+            #remove expired vms
+            if option == "r":
+                curr_time = (float(item["starttime"]))
+                for machine in machine_list:
+                    machine.remove_expired_VM(curr_time)
+
             for m in machine_list:
                 if(m.checkVm(item)):
                     if((vmcore+m.core_used) < least_fit):
@@ -180,9 +207,7 @@ def worse_fit(vm_entry_list,vm_type_list):
                         machine_list.append(m)
             chosen_machine.addVM(item)      
     return machine_list
-
-
-
+    
 
 def main():
 
@@ -190,14 +215,17 @@ def main():
     vm_type_list = fileToDict("csv/vm type list.csv")
     vm_entry_1000 = fileToDict("csv/vm entry list(1000).csv")
 
+    print(len(vm_entry_1000))
+
     # get total number of vmTypes that is in machine 16 and store them in list
+    
     print("total number of vm types: " + str(len(vm_type_list)))
     print("----------------------------------------------------------------")
 
     #offline algorithm
 
     #next fit
-    machine_list = next_fit(vm_entry_1000,vm_type_list)
+    machine_list = next_fit(vm_entry_1000,vm_type_list,"r")
     print("next fit")
     #print first 5 machine
     for i in range(5):
@@ -206,13 +234,13 @@ def main():
     counter = 0
     for item in machine_list:
         counter += len(item.vm_list)
-
+    print("number of VMs in physical machines:"+str(counter))
     print("number of physical machine required:"+str(len(machine_list)))
     print("----------------------------------------------------------------")
 
 
     # first fit
-    machine_list = first_fit(vm_entry_1000,vm_type_list)
+    machine_list = first_fit(vm_entry_1000,vm_type_list,"r")
     print("first fit")
     #print first 5 machine
     for i in range(5):
@@ -221,12 +249,12 @@ def main():
     counter = 0
     for item in machine_list:
         counter += len(item.vm_list)
-
+    print("number of VMs in physical machines:"+str(counter))
     print("number of physical machine required:"+str(len(machine_list)))
     print("----------------------------------------------------------------")
 
     # best fit
-    machine_list = best_fit(vm_entry_1000,vm_type_list)
+    machine_list = best_fit(vm_entry_1000,vm_type_list,"r")
     print("best fit")
     for i in range(5):
         print(machine_list[i])
@@ -239,7 +267,7 @@ def main():
     print("----------------------------------------------------------------")
 
     # Worse fit
-    machine_list = worse_fit(vm_entry_1000,vm_type_list)
+    machine_list = worse_fit(vm_entry_1000,vm_type_list,"r")
     print("worse fit")
 
     counter = 0

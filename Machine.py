@@ -27,6 +27,14 @@ class Machine:
             result = False
         return result
 
+    def remove_expired_VM(self,currtime):
+        for item in self.vm_list:
+            if(item["endtime"]!=""):
+                if float(item["endtime"]) <= currtime:
+                    print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"]  + " was removed from machine " + str(self.id) + " at " + str(currtime))
+                    self.removeVM(item)
+                
+
     def __repr__(self) -> str:
          rep = 'machine( Core Used: ' +str(self.core_used) + ', Memory used: ' + str(self.memory_used) + ', number of vm inside machine: ' + str(len(self.vm_list)) + ")"
          return rep

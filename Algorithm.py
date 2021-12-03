@@ -59,17 +59,18 @@ def first_fit(vm_entry_list,vm_type_list,option):
 
     counter = 0
     for item in vm_list:
+
+         #remove expired vms
+        if option == "r":
+            curr_time = (float(item["starttime"]))
+            for machine in machine_list:
+                machine.remove_expired_VM(curr_time)
+
         for machine in machine_list:
             vm_isValid = find_VM_by_id(item["vmTypeId"], vm_type_list)
             if (vm_isValid == False):
                 break
-            else:
-                #remove expired vms
-                if option == "r":
-                    curr_time = (float(item["starttime"]))
-                    for machine in machine_list:
-                        machine.remove_expired_VM(curr_time)
-                
+            else: 
                 if(machine.checkVm(item)):
                     machine.addVM(item)
                     break
@@ -141,16 +142,16 @@ def best_fit(vm_entry_list,vm_type_list,option):
         closest_fit = 0
         chosen_machine = 0
 
+        #remove expired vms
+        if option == "r":
+            curr_time = (float(item["starttime"]))
+            for machine in machine_list:
+                machine.remove_expired_VM(curr_time)
+
         
         if(vm_isvalid == False):
             break
         else:
-            #remove expired vms
-            if option == "r":
-                curr_time = (float(item["starttime"]))
-                for machine in machine_list:
-                    machine.remove_expired_VM(curr_time)
-
             for m in machine_list:
                 if(m.checkVm(item)):
                     if((vmcore+m.core_used) > closest_fit):
@@ -183,17 +184,16 @@ def worse_fit(vm_entry_list,vm_type_list, option):
         vmcore = float(item["core"])
         least_fit = 1
         chosen_machine = len(machine_list)+1
+
+        #remove expired vms
+        if option == "r":
+            curr_time = (float(item["starttime"]))
+            for machine in machine_list:
+                machine.remove_expired_VM(curr_time)
     
         if(vm_isvalid == False):
             break
         else:
-
-            #remove expired vms
-            if option == "r":
-                curr_time = (float(item["starttime"]))
-                for machine in machine_list:
-                    machine.remove_expired_VM(curr_time)
-
             for m in machine_list:
                 if(m.checkVm(item)):
                     if((vmcore+m.core_used) < least_fit):
@@ -213,9 +213,7 @@ def main():
 
     #get relevant files and store them in a dictionary
     vm_type_list = fileToDict("csv/vm type list.csv")
-    vm_entry_1000 = fileToDict("csv/vm entry list(1000).csv")
-
-    print(len(vm_entry_1000))
+    vm_entry_1000 = fileToDict("csv/vm entry list(2000).csv")
 
     # get total number of vmTypes that is in machine 16 and store them in list
     
@@ -275,6 +273,26 @@ def main():
         print(item)
         counter += len(item.vm_list)
 
+    print("number of VMs in physical machines:"+str(counter))
+    print("number of physical machine required:"+str(len(machine_list)))
+    print("----------------------------------------------------------------")
+
+
+def test():
+    #get relevant files and store them in a dictionary
+    vm_type_list = fileToDict("csv/vm type list.csv")
+    vm_entry_1000 = fileToDict("csv/vm entry list(5000).csv")
+
+    # first fit
+    machine_list = first_fit(vm_entry_1000,vm_type_list,"r")
+    print("first fit")
+    #print first 5 machine
+    for m in machine_list:
+        print(m)
+
+    counter = 0
+    for item in machine_list:
+        counter += len(item.vm_list)
     print("number of VMs in physical machines:"+str(counter))
     print("number of physical machine required:"+str(len(machine_list)))
     print("----------------------------------------------------------------")

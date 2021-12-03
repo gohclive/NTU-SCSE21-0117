@@ -66,6 +66,7 @@ def save():
         vm_entry_list = get_vm_entry(con,0,2,100)
         header = ["vmId","vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
         save_to_csv("csv/vm entry list(100).csv",header,vm_entry_list)
+
     con.close()
 
 

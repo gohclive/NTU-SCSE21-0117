@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/run.py",
             "console": "integratedTerminal",
-            "args": ["csv/vm entry list(100).csv","csv/vm type list.csv","nextfit"]
+            "args": ["csv/vm entry list(100).csv","csv/vm type list.csv","-a"]
         }
     ]
 }

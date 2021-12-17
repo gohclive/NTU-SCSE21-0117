@@ -2,8 +2,8 @@ import sys
 import Algorithm as algo
 
 
-def print_algo(method, vm_entry_list, vm_list,option):
-    machine_list = method(vm_entry_list, vm_list,option)
+def print_algo(method, vm_entry_list):
+    machine_list = method(vm_entry_list)
     for item in machine_list:
         print(item)
         item.get_vm_list()
@@ -33,59 +33,40 @@ else:
     if (sys.argv[3] == "-a"):
         # next fit
         print("next fit")
-        print_algo(algo.next_fit, vm_entry_list, vm_list,"")
-        # next fit with remove vm option
-        print("next fit with remove vm option")
-        print_algo(algo.next_fit, vm_entry_list, vm_list,"r")
+        print_algo(algo.next_fit, vm_entry_list)
 
         # first fit
         print("first fit")
-        print_algo(algo.first_fit, vm_entry_list, vm_list,"")
-        # first fit with remove vm option
-        print("next fit with remove vm option")
-        print_algo(algo.first_fit, vm_entry_list, vm_list,"r")
+        print_algo(algo.first_fit, vm_entry_list)
 
         # best fit
         print("best fit")
-        print_algo(algo.best_fit, vm_entry_list, vm_list,"")
-        # best fit with remove vm option
-        print("best fit with remove vm option")
-        print_algo(algo.best_fit, vm_entry_list, vm_list,"r")
+        print_algo(algo.best_fit, vm_entry_list)
 
         # worst fit
         print("worst fit")
-        print_algo(algo.worse_fit, vm_entry_list, vm_list,"")
-        # worst fit with remove vm option
-        print("worst fit with remove vm option")
-        print_algo(algo.worse_fit, vm_entry_list, vm_list,"r")
+        print_algo(algo.worse_fit, vm_entry_list)
+
 
     elif (sys.argv[3] == "nextfit"):
         # next fit
         print("next fit")
-        if "-r" in opts:
-            print_algo(algo.next_fit, vm_entry_list, vm_list,"r")
-        else:
-            print_algo(algo.next_fit, vm_entry_list, vm_list,"")
+        print_algo(algo.next_fit, vm_entry_list)
+
     elif (sys.argv[3] == "firstfit"):
         # first fit
         print("first fit")
-        if "-r" in opts:
-            print_algo(algo.next_fit, vm_entry_list, vm_list,"r")
-        else:
-            print_algo(algo.next_fit, vm_entry_list, vm_list,"")
+        print_algo(algo.next_fit, vm_entry_list)
+
     elif (sys.argv[3] == "bestfit"):
         # best fit
         print("best fit")
-        if "-r" in opts:
-            print_algo(algo.best_fit, vm_entry_list, vm_list,"r")
-        else:
-            print_algo(algo.best_fit, vm_entry_list, vm_list,"")
+        print_algo(algo.best_fit, vm_entry_list)
+
     elif (sys.argv[3] == "worsefit"):
         # Worse fit
         print("worst fit")
-        if "-r" in opts:
-            print_algo(algo.worse_fit, vm_entry_list, vm_list,"r")
-        else:
-            print_algo(algo.worse_fit, vm_entry_list, vm_list,"")
+        print_algo(algo.worse_fit, vm_entry_list)
+
     else:
         print("invalid algorithm")

@@ -27,12 +27,11 @@ class Machine:
             result = False
         return result
 
-    def remove_expired_VM(self,currtime):
+    def remove_expired_VM(self,vmid):
         for item in self.vm_list:
-            if(item["endtime"]!=""):
-                if float(item["endtime"]) <= currtime:
-                    print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"]  + " was removed from machine " + str(self.id) + " at " + str(currtime))
-                    self.removeVM(item)
+            if float(item["vmId"]) == vmid:
+                print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"]  + " was removed from machine " + str(self.id))
+                self.removeVM(item)
                 
 
     def __repr__(self) -> str:

@@ -65,12 +65,16 @@ def first_fit(vm_entry_list):
     # check if machine have available space, if True, add vm entry to machine
     # else create new machine instance, add vm to machine and append it to the list
 
+    machine_counter = 0
+
     counter = 0
     print("x,y")
     for item in vm_list:
         if item["status"] == "start":
             for machine in machine_list:
                 if(machine.checkVm(item)):
+                    if len(machine.vm_dict) == 0:
+                        machine_counter += 1
                     machine.addVM(item)
                     add_entry(vm_mach,item["vmId"],machine.id)
                     
@@ -80,12 +84,14 @@ def first_fit(vm_entry_list):
                 m = Machine(counter)
                 m.addVM(item)
                 machine_list.append(m)
+                machine_counter += 1
                 add_entry(vm_mach,item["vmId"],m.id)
                 
         else:
             machid = vm_mach[item["vmId"]]
-            machine_list[machid].remove_expired_vm(item["vmId"])  
-        machine_used_over_time(item["time"],len(machine_list))
+            machine_list[machid].remove_expired_vm(item["vmId"]) 
+            machine_counter -= 1 
+        print(item["time"],machine_counter,sep=",")
     return machine_list
 
 
@@ -125,7 +131,7 @@ def next_fit(vm_entry_list):
         else:
             machid = vm_mach[item["vmId"]]
             machine_list[machid].remove_expired_vm(item["vmId"])
-        machine_used_over_time(item["time"],len(machine_list))
+        machine_used_over_time(item["time"],machine_list)
     return machine_list
 
 
@@ -138,6 +144,7 @@ def best_fit(vm_entry_list):
     #key = vmId, value = machine
     vm_mach = {}
 
+    
     # find lower bound for vm entry core
     total_core = 0
     for item in vm_entry_list:
@@ -220,8 +227,13 @@ def worse_fit(vm_entry_list):
     return machine_list
 
 
-def machine_used_over_time(time,no_of_machine):
-    print(time,no_of_machine,sep=",")
+def machine_used_over_time(time,machine_list):
+    count = 0
+    for machine in machine_list:
+        if(len(machine.vm_dict)!=0):
+            count+=1
+    print(time,count,sep=",")
+
 
 def main():
     # get relevant files and store them in a dictionary
@@ -296,13 +308,13 @@ def test():
     vm_entry = fileToDict("csv/vm entry list.csv")
 
     # next fit
-    # machine_list = first_fit(vm_entry)
+    machine_list = first_fit(vm_entry)
 
     # next fit
     #machine_list = next_fit(vm_entry)
 
     # best fit
-    machine_list = best_fit(vm_entry)
+    #machine_list = best_fit(vm_entry)
 
     # worst fit
     #machine_list = next_fit(vm_entry)

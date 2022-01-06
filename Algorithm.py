@@ -89,8 +89,9 @@ def first_fit(vm_entry_list):
                 
         else:
             machid = vm_mach[item["vmId"]]
-            machine_list[machid].remove_expired_vm(item["vmId"]) 
-            machine_counter -= 1 
+            machine_list[machid].remove_expired_vm(item["vmId"])
+            if len(machine_list[machid].vm_dict) == 0:
+                machine_counter -= 1 
         print(item["time"],machine_counter,sep=",")
     return machine_list
 

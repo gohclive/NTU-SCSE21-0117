@@ -65,9 +65,10 @@ def first_fit(vm_entry_list):
     # check if machine have available space, if True, add vm entry to machine
     # else create new machine instance, add vm to machine and append it to the list
 
+    #count the number of physical machine use
     machine_counter = 0
 
-    counter = 0
+    machid = 0
     print("x,y")
     for item in vm_list:
         if item["status"] == "start":
@@ -77,21 +78,21 @@ def first_fit(vm_entry_list):
                         machine_counter += 1
                     machine.addVM(item)
                     add_entry(vm_mach,item["vmId"],machine.id)
-                    
                     break
             else:
-                counter += 1
-                m = Machine(counter)
+                machid += 1
+                m = Machine(machid)
                 m.addVM(item)
                 machine_list.append(m)
                 machine_counter += 1
                 add_entry(vm_mach,item["vmId"],m.id)
                 
         else:
-            machid = vm_mach[item["vmId"]]
-            machine_list[machid].remove_expired_vm(item["vmId"])
-            if len(machine_list[machid].vm_dict) == 0:
+            id = vm_mach[item["vmId"]]
+            machine_list[id].remove_expired_vm(item["vmId"])
+            if len(machine_list[id].vm_dict) == 0:
                 machine_counter -= 1 
+            remove_entry(vm_mach,item["vmId"])
         print(item["time"],machine_counter,sep=",")
     return machine_list
 
@@ -114,7 +115,8 @@ def next_fit(vm_entry_list):
     # check if machine have available space, if True, add vm entry to machine
     # else create new machine instance, add vm to machine and append it to the list
 
-    counter = 0
+    machine_counter = 0
+    machid = 0
     curr_mach = m0
     print("x,y")
     for item in vm_list:
@@ -122,17 +124,23 @@ def next_fit(vm_entry_list):
             if(curr_mach.checkVm(item)):
                 curr_mach.addVM(item)
                 add_entry(vm_mach,item["vmId"],curr_mach.id)
+                if len(curr_mach.vm_dict) == 0:
+                    machine_counter += 1
             else:
-                counter += 1
-                m = Machine(counter)
+                machid += 1
+                m = Machine(machid)
                 m.addVM(item)
                 add_entry(vm_mach,item["vmId"],m.id)
+                machine_counter += 1
                 curr_mach = m
                 machine_list.append(m)
         else:
-            machid = vm_mach[item["vmId"]]
-            machine_list[machid].remove_expired_vm(item["vmId"])
-        machine_used_over_time(item["time"],machine_list)
+            id = vm_mach[item["vmId"]]
+            machine_list[id].remove_expired_vm(item["vmId"])
+            if len(machine_list[id].vm_dict) == 0:
+                machine_counter -= 1
+            remove_entry(vm_mach,item["vmId"])
+        print(item["time"],machine_counter, sep = ",")
     return machine_list
 
 
@@ -145,39 +153,48 @@ def best_fit(vm_entry_list):
     #key = vmId, value = machine
     vm_mach = {}
 
-    
-    # find lower bound for vm entry core
-    total_core = 0
-    for item in vm_entry_list:
-        total_core += float(item["core"])
-    optimal_num_machine = math.ceil(total_core/1)
-
-    # initalise and declare machine list and machine
+    # initalise and declare machine list and add 1 machine to list
     machine_list = []
-    for i in range(optimal_num_machine):
-        m = Machine(i)
-        machine_list.append(m)
+    machid = 0
+    m = Machine(machid)
+    machine_list.append(m)
+
+    machine_counter = 0
 
     print("x,y")
     for item in vm_list:
         vmcore = float(item["core"])
-        closest_fit = 0
-        chosen_machine = 0
+        vmmem = float(item["memory"])
+        item_cap = vmcore+vmmem
 
+        #check vm status, add vm to chosen machine if status = start, remove vm if status = end
         if item["status"] == "start":
+            chosen_machine = None
+            #find optimal machine by sorting the machine
+            machine_list.sort(key = lambda i: i["mem"]+i["core"])
             for m in machine_list:
-                if(m.checkVm(item)):
-                    if((vmcore+m.core_used) > closest_fit):
-                        closest_fit = vmcore+m.core_used
-                        chosen_machine = m
-                else:
-                    continue
-            chosen_machine.addVM(item)
+                if m["mem"] <= vmcore +m["mem"] and m["core"] <= vmmem + m["core"]:
+                    chosen_machine=m
+                    break
+            if chosen_machine == None:
+                machid += 1
+                m = Machine(machid)
+                m.addVM(item)
+                machine_list.append(Machine(machid))
+                machine_counter +=1
+            else:
+                if len(chosen_machine.vm_dict) == 0:
+                            machine_counter += 1
+                chosen_machine.addVM(item)
             add_entry(vm_mach,item["vmId"],chosen_machine.id)
+            
         else:
             machid = vm_mach[item["vmId"]]
             machine_list[machid].remove_expired_vm(item["vmId"])
-        machine_used_over_time(item["time"],len(machine_list))
+            remove_entry(vm_mach,item["vmId"])
+            if len(chosen_machine.vm_dict) == 0:
+                        machine_counter -= 1
+        print(item["time"],machine_counter, sep = ",")
     return machine_list
 
 
@@ -189,42 +206,52 @@ def worse_fit(vm_entry_list):
     #key = vmId, value = machine
     vm_mach = {}
 
-    # find lower bound for vm entry core
-    total_core = 0
-    for item in vm_entry_list:
-        total_core += float(item["core"])
-    optimal_num_machine = math.ceil(total_core/1)
 
-    # initalise and declare machine list and machine
+    # initalise and declare machine list and add 1 machine to list
     machine_list = []
-    for i in range(optimal_num_machine):
-        m = Machine(i)
-        machine_list.append(m)
+    machid = 0
+    m = Machine(machid)
+    machine_list.append(m)
+
+    machine_counter = 0
 
     print("x,y")
     for item in vm_list:
         vmcore = float(item["core"])
-        least_fit = 1
-        chosen_machine = len(machine_list)+1
+        
+        vmcore = float(item["core"])
+        vmmem = float(item["memory"])
+        item_cap = vmcore+vmmem
 
+         #check vm status, add vm to chosen machine if status = start, remove vm if status = end
         if item["status"] == "start":
+            chosen_machine = None
+            #find optimal machine by sorting the machine
+            machine_list.sort(reverse=True,key = lambda i: i["mem"]+i["core"])
             for m in machine_list:
-                if(m.checkVm(item)):
-                    if((vmcore+m.core_used) < least_fit):
-                        least_fit = vmcore+m.core_used
-                        chosen_machine = m
+                if m["mem"] <= vmcore +m["mem"] and m["core"] <= vmmem + m["core"]:
+                    chosen_machine=m
+                    break
+                if chosen_machine == None:
+                    machid += 1
+                    m = Machine(machid)
+                    m.addVM(item)
+                    machine_list.append(Machine(machid))
+                    machine_counter +=1
+                    add_entry(vm_mach,item["vmId"],machid) 
                 else:
-                    # if none of the machine is available, create new machine instance
-                    if(chosen_machine == len(machine_list)+1):
-                        m = Machine(len(machine_list)+1)
-                        chosen_machine = m
-                        machine_list.append(m)
-            chosen_machine.addVM(item)
-            add_entry(vm_mach,item["vmId"],chosen_machine.id)
+                    if len(chosen_machine.vm_dict) == 0:
+                        machine_counter += 1
+                    chosen_machine.addVM(item)
+                    add_entry(vm_mach,item["vmId"],chosen_machine.id)   
+
         else:
             machid = vm_mach[item["vmId"]]
             machine_list[machid].remove_expired_vm(item["vmId"])
-        machine_used_over_time(item["time"],len(machine_list))
+            if len(chosen_machine.vm_dict) == 0:
+                machine_counter -= 1
+            remove_entry(vm_mach,item["vmId"])
+        print(item["time"],machine_counter, sep = ",")
     return machine_list
 
 
@@ -309,10 +336,10 @@ def test():
     vm_entry = fileToDict("csv/vm entry list.csv")
 
     # next fit
-    machine_list = first_fit(vm_entry)
+    #machine_list = first_fit(vm_entry)
 
     # next fit
-    #machine_list = next_fit(vm_entry)
+    machine_list = next_fit(vm_entry)
 
     # best fit
     #machine_list = best_fit(vm_entry)

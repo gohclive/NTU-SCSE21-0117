@@ -52,7 +52,7 @@ class Machine:
     #             print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"]  + " was removed from machine " + str(self.id))
     #             self.removeVM(item)
 
-    # def get_vm_list(self):
-    #     for item in self.vm_list:
-    #         print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"] + " was added to machine " + str(self.id) + " core used: " + item["core"] + " memory used:" + item["memory"])
+    def get_vm_list(self):
+         for item in self.vm_dict:
+             print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"] + " was added to machine " + str(self.id) + " core used: " + item["core"] + " memory used:" + item["memory"])
        

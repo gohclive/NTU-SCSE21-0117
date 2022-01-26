@@ -1,6 +1,7 @@
-class VMEntry:
+class VMRequest:
      # instance attributes
-    def __init__(self,vmTypeId,priority,starttime,endtime):
+    def __init__(self,id,vmTypeId,priority,starttime,endtime):
+        self.id = id
         self.vmTypeId = vmTypeId
         self.priority = priority
         self.starttime = starttime

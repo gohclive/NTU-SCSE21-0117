@@ -47,11 +47,11 @@ def get_vmType(con, vmId):
     rows = cur.fetchall()
     return rows
 
-def save_to_csv(name,header,l):
+def save_to_csv(name,header,vmlist):
     with open(name,'w',newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
-        writer.writerows(l)
+        writer.writerows(vmlist)
 
 def save():
     """ This method creates the csv directory along with the relevent csv files used in this project."""

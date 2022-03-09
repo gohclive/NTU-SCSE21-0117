@@ -140,3 +140,5 @@ dmypy.json
 cython_debug/
 csv/vm entry list.csv
 csv/vm entry list.csv
+csv/
+workspace.code-workspace

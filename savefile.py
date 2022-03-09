@@ -24,12 +24,11 @@ def get_vm_entry(con, starttime1, starttime2, limit):
     return vm_entry_list
 
 
-def get_vm_entry_new(con):
+def get_vm_entry_new(con,starttime1, starttime2):
     cur = con.cursor()
-    query = "select vm.vmId,vm.vmTypeId,priority,starttime as \"time\", core, memory, machineId, 'start' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime > 0 and starttime < 2 and machineId = 16 UNION select vm.vmId,vm.vmTypeId,priority,endtime as \"time\", core, memory, machineId, 'end' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime > 0 and starttime < 2 and machineId = 16 and time is not null order by time"
-    cur.execute(query)
+    query = "select vm.vmId,vm.vmTypeId,priority,starttime as \"time\", core, memory, machineId, 'start' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime >= ? and starttime <= ? and machineId = 16 and endtime is not null UNION select vm.vmId,vm.vmTypeId,priority,endtime as \"time\", core, memory, machineId, 'end' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime >= ? and starttime <= ? and machineId = 16 and time is not null order by time"
+    cur.execute(query,(starttime1, starttime2, starttime1, starttime2))
     vm_entry_list = cur.fetchall()
-    print(vm_entry_list[0])
     return vm_entry_list
 
 # def get_vm_entry_new(con,limit):
@@ -62,16 +61,21 @@ def save():
     if not my_dir.is_dir():
         print("csv folder not found, creating folder")
         my_dir.mkdir()
-    if not (Path("csv/vm entry list.csv").exists()):
-        print("vm entry list not found")
-        vm_entry_list = get_vm_entry_new(con)
+    if not (Path("csv/vm entry list(0-2).csv").exists()):
+        print("csv/vm entry list(0-2).csv")
+        vm_entry_list = get_vm_entry_new(con,0,2)
         header = ["vmId","vmTypeId","priority","time","core","memory", "machineId","status"]  
-        save_to_csv("csv/vm entry list.csv",header,vm_entry_list)
-    if not (Path("csv/vm entry list(2000).csv").exists()):
-        print("vm entry list(2000) not found")
-        vm_entry_list = get_vm_entry_new(con,2000)
+        save_to_csv("csv/vm entry list(0-4).csv",header,vm_entry_list)
+    if not (Path("csv/vm entry list(0-4).csv").exists()):
+        print("vm entry list(0-4) not found")
+        vm_entry_list = get_vm_entry_new(con,0,4)
         header = ["vmId","vmTypeId","priority","time","core","memory", "machineId","status"]  
-        save_to_csv("csv/vm entry list(2000).csv",header,vm_entry_list)
+        save_to_csv("csv/vm entry list(0-4).csv",header,vm_entry_list)
+    if not (Path("csv/vm entry list(0-6).csv").exists()):
+        print("vm entry list(0-6) not found")
+        vm_entry_list = get_vm_entry_new(con,0,6)
+        header = ["vmId","vmTypeId","priority","time","core","memory", "machineId","status"]  
+        save_to_csv("csv/vm entry list(0-6).csv",header,vm_entry_list)
 
     con.close()
     

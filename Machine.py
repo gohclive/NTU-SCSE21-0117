@@ -29,8 +29,9 @@ class Machine:
 
     def remove_expired_vm(self,vmid):
         item = self.vm_dict[vmid]
+        #print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"] + " was removed from machine " + str(self.id) + " core used: " + item["core"] + " memory used:" +item["memory"])
         self.removeVM(item)
-
+        
 
     def __repr__(self) -> str:
          rep = 'machine( Core Used: ' +str(self.core_used) + ', Memory used: ' + str(self.memory_used) + ', number of vm inside machine: ' + str(len(self.vm_dict)) + ")"

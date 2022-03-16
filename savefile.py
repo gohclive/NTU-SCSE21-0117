@@ -15,29 +15,29 @@ def create_connection():
         print(e)
     return con
 
-def get_vm_entry(con, starttime1, starttime2, limit):
+def get_vm_request(con, starttime1, starttime2, limit):
     cur = con.cursor()
     cur.execute("select vm.vmId,vm.vmTypeId,priority,starttime,endtime, core, memory, machineId  from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime > ? and starttime < ? and machineId = 16 order by CAST(starttime as float) limit ?",
                 (starttime1, starttime2, limit))
-    vm_entry_list = cur.fetchall()
-    print(vm_entry_list[0])
-    return vm_entry_list
+    vm_request_list = cur.fetchall()
+    print(vm_request_list[0])
+    return vm_request_list
 
 
-def get_vm_entry_new(con,starttime1, starttime2):
+def get_vm_request_new(con,starttime1, starttime2):
     cur = con.cursor()
     query = "select vm.vmId,vm.vmTypeId,priority,starttime as \"time\", core, memory, machineId, 'start' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime >= ? and starttime <= ? and machineId = 16 and endtime is not null UNION select vm.vmId,vm.vmTypeId,priority,endtime as \"time\", core, memory, machineId, 'end' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime >= ? and starttime <= ? and machineId = 16 and time is not null order by time"
     cur.execute(query,(starttime1, starttime2, starttime1, starttime2))
-    vm_entry_list = cur.fetchall()
-    return vm_entry_list
+    vm_request_list = cur.fetchall()
+    return vm_request_list
 
-# def get_vm_entry_new(con,limit):
+# def get_vm_request_new(con,limit):
 #     cur = con.cursor()
 #     query = "select vm.vmId,vm.vmTypeId,priority,starttime as \"time\", core, memory, machineId, 'start' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime > 0 and starttime < 2 and machineId = 16 UNION select vm.vmId,vm.vmTypeId,priority,endtime as \"time\", core, memory, machineId, 'end' as status from vm inner join vmType on vm.vmTypeId = vmType.vmTypeId where starttime > 0 and starttime < 2 and machineId = 16 and time is not null order by time limit 2000"
 #     cur.execute(query)
-#     vm_entry_list = cur.fetchall()
-#     print(vm_entry_list[0])
-#     return vm_entry_list
+#     vm_request_list = cur.fetchall()
+#     print(vm_request_list[0])
+#     return vm_request_list
 
 def get_vmType(con, vmId):
     cur = con.cursor()
@@ -61,46 +61,24 @@ def save():
     if not my_dir.is_dir():
         print("csv folder not found, creating folder")
         my_dir.mkdir()
-    if not (Path("csv/vm entry list(0-2).csv").exists()):
-        print("csv/vm entry list(0-2).csv")
-        vm_entry_list = get_vm_entry_new(con,0,2)
+    if not (Path("csv/vm request list(0-2).csv").exists()):
+        print("csv/vm request list(0-2).csv")
+        vm_request_list = get_vm_request_new(con,0,2)
         header = ["vmId","vmTypeId","priority","time","core","memory", "machineId","status"]  
-        save_to_csv("csv/vm entry list(0-4).csv",header,vm_entry_list)
-    if not (Path("csv/vm entry list(0-4).csv").exists()):
-        print("vm entry list(0-4) not found")
-        vm_entry_list = get_vm_entry_new(con,0,4)
+        save_to_csv("csv/vm request list(0-4).csv",header,vm_request_list)
+    if not (Path("csv/vm request list(0-4).csv").exists()):
+        print("vm request list(0-4) not found")
+        vm_request_list = get_vm_request_new(con,0,4)
         header = ["vmId","vmTypeId","priority","time","core","memory", "machineId","status"]  
-        save_to_csv("csv/vm entry list(0-4).csv",header,vm_entry_list)
-    if not (Path("csv/vm entry list(0-6).csv").exists()):
-        print("vm entry list(0-6) not found")
-        vm_entry_list = get_vm_entry_new(con,0,6)
+        save_to_csv("csv/vm request list(0-4).csv",header,vm_request_list)
+    if not (Path("csv/vm request list(0-6).csv").exists()):
+        print("vm request list(0-6) not found")
+        vm_request_list = get_vm_request_new(con,0,6)
         header = ["vmId","vmTypeId","priority","time","core","memory", "machineId","status"]  
-        save_to_csv("csv/vm entry list(0-6).csv",header,vm_entry_list)
+        save_to_csv("csv/vm request list(0-6).csv",header,vm_request_list)
 
     con.close()
     
-    # if  not (Path("csv/vm type list.csv").exists()):
-    #     print("vm type list not found, creating vm type list.csv")
-    #     vm_type_list = get_vmType(con,VM_ID)
-    #     header = ["vmTypeId","core","memory"]
-    #     save_to_csv("csv/vm type list.csv",header,vm_type_list)
-    # if not (Path("csv/vm entry list.csv").exists()):
-    #     print("vm entry list entry not found, creating vm entry list.csv")
-    #     vm_entry_list = get_vm_entry(con,0,2,"5204184")
-    #     header = ["vmId","vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
-    #     save_to_csv("csv/vm entry list.csv",header,vm_entry_list)
-    # if not (Path("csv/vm entry list(1000).csv").exists()):
-    #     print("vm entry list(1000) not found")
-    #     vm_entry_list = get_vm_entry(con,0,2,1000)
-    #     header = ["vmId","vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
-    #     save_to_csv("csv/vm entry list(1000).csv",header,vm_entry_list)
-    # if not (Path("csv/vm entry list(100).csv").exists()):
-    #     print("vm entry list(100) not found")
-    #     vm_entry_list = get_vm_entry(con,0,2,100)
-    #     header = ["vmId","vmTypeId","priority","starttime","endtime","core","memory", "machineId"]  
-    #     save_to_csv("csv/vm entry list(100).csv",header,vm_entry_list) 
-
-
 
 if __name__ == '__main__':
     save()

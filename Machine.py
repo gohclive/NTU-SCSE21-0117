@@ -37,24 +37,4 @@ class Machine:
          rep = 'machine( Core Used: ' +str(self.core_used) + ', Memory used: ' + str(self.memory_used) + ', number of vm inside machine: ' + str(len(self.vm_dict)) + ")"
          return rep
 
-    # def addVM(self,vm):
-    #     self.vm_dict.append(vm)
-    #     self.core_used +=  float(vm["core"])
-    #     self.memory_used += float(vm["memory"])
-    
-    # def removeVM(self,vm):
-    #     self.vm_dict.remove(vm)
-    #     self.core_used -=  float(vm["core"])
-    #     self.memory_used -= float(vm["memory"])
-
-    # def remove_expired_VM(self,vmid):
-    #     for item in self.vm_list:
-    #         if float(item["vmId"]) == vmid:
-    #             print("vmId: " + item["vmId"] + " vmtype: " + item["vmTypeId"]  + " was removed from machine " + str(self.id))
-    #             self.removeVM(item)
-
-    def get_vm_list(self):
-         for item in self.vm_dict:
-             print("vmId: " + self.vm_dict[item]["vmId"] + " vmtype: " + self.vm_dict[item]["vmTypeId"] + " was added to machine " + str(self.id) + " core used: " + self.vm_dict[item]["core"] + " memory used:" + self.vm_dict[item]["memory"])
-             #print(item)
        

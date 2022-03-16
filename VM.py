@@ -9,15 +9,5 @@ class VM:
          rep = 'VM(' +str(self.vmTypeId) + ',' + str(self.core) + ',' + str(self.memory) + ")"
          return rep
 
-class Entry:
-     # instance attributes
-    def __init__(self,vmTypeId,core,memory):
-        self.vmTypeId = vmTypeId
-        self.core = core
-        memory = memory
-    
-    def __repr__(self) -> str:
-         rep = 'Request(' +str(self.vmTypeId) + ',' + str(self.priority) + ',' + str(self.starttime) + ',' + str(self.endtime) + ")"
-         return rep
 
     
